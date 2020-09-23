@@ -4,16 +4,13 @@
 
  - 可定时，默认为每天6点5分
  - 默认每次提交上次所提交的内容（只有时间部分更新）
- - 更新表单杭州健康码部分，默认已领取绿卡，如更改选项，见`daka.py`中第84行注释
- - 已更新表单至4月18日状态
+ - 系统表单如有更新，在当天自行手机打卡，后面会自动按照你更新后的选项继续打卡
 
  项目用于学习交流，仅用于各项无异常时打卡，如有身体不适等情况还请自行如实打卡~
 
 <img src="https://github.com/Tishacy/ZJU-nCov-Hitcarder/raw/master/demo.png" width="500px"/>
 
 > 感谢[conv1d](https://github.com/conv1d)同学，已使用requests直接登录浙大统一认证平台，不再依赖phantomjs
->
-> ~~增加了各操作系统的phantomjs和自动选driver的功能，结果导致库变得较大，如果想自行下载对应版本的phantomjs，可以切换到`neat`分支（只保留了windows系统的phantomjs）下载本项目。~~
 
 ## Usage
 
