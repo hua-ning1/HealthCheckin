@@ -2,8 +2,27 @@
 import requests, json, re
 import time, datetime, os, sys
 import getpass
-from halo import Halo
-from apscheduler.schedulers.blocking import BlockingScheduler
+# from halo import Halo
+# from apscheduler.schedulers.blocking import BlockingScheduler
+# 删除定时模块
+
+# 环境变量
+# 统一认证学号
+username = os.environ["USERNAME"]
+# 统一认证密码
+password = os.environ["PASSWORD"]
+# server酱的sckey
+sckey = os.environ["PUSH_KEY"]
+# customize address
+# todo
+
+def send_message(title='无效', text=''):
+    if not len(sckey):
+        if text == '':
+            requests.get('https://sc.ftqq.com/' + sckey + '.send?text=' + title)
+        else:
+            requests.get('https://sc.ftqq.com/' + sckey + '.send?text=' + title + '&desp=' + text)
+    return
 
 class DaKa(object):
     """Hit card class
@@ -16,7 +35,7 @@ class DaKa(object):
         save_url: (str) 提交打卡url
         sess: (requests.Session) 统一的session
     """
-    def __init__(self, username, password):
+    def __init__(self):
         self.username = username
         self.password = password
         self.login_url = "https://zjuam.zju.edu.cn/cas/login?service=https%3A%2F%2Fhealthreport.zju.edu.cn%2Fa_zju%2Fapi%2Fsso%2Findex%3Fredirect%3Dhttps%253A%252F%252Fhealthreport.zju.edu.cn%252Fncov%252Fwap%252Fdefault%252Findex"
@@ -42,6 +61,7 @@ class DaKa(object):
 
         # check if login successfully
         if '统一身份认证' in res.content.decode():
+            send_message(title='登录失败，请核实账号密码重新登录')
             raise LoginError('登录失败，请核实账号密码重新登录')
         return self.sess
     
@@ -66,6 +86,7 @@ class DaKa(object):
             if len(old_infos) != 0:
                 old_info = json.loads(old_infos[0])
             else:
+                send_message(title='未发现缓存信息，请先至少手动成功打卡一次再运行脚本')
                 raise RegexMatchError("未发现缓存信息，请先至少手动成功打卡一次再运行脚本")
 
             new_info_tmp = json.loads(re.findall(r'def = ({[^\n]+})', html)[0])
@@ -73,8 +94,10 @@ class DaKa(object):
             name = re.findall(r'realname: "([^\"]+)",', html)[0]
             number = re.findall(r"number: '([^\']+)',", html)[0]
         except IndexError as err:
+            send_message(title='Relative info not found in html with regex')
             raise RegexMatchError('Relative info not found in html with regex')
         except json.decoder.JSONDecodeError as err:
+            send_message(title='JSON decode error')
             raise DecodeError('JSON decode error')
 
         new_info = old_info.copy()
@@ -83,6 +106,11 @@ class DaKa(object):
         new_info['number'] = number
         new_info["date"] = self.get_date()
         new_info["created"] = round(time.time())
+        # todo
+        # new_info['address'] = '浙江省杭州市西湖区余杭塘路866号浙江大学紫金港校区'   # 如: 'xx省xx市xx区xx街道xx小区'
+        # new_info['area'] = '浙江省 杭州市 西湖区'     # 如: '浙江省 杭州市 西湖区'  记得中间用空格隔开, 省市区/县名称可以参考 打卡页面->基本信息->家庭所在地 中对应的省市区/县名
+        # new_info['province'] = new_info['area'].split(' ')[0]   # 省名
+        # new_info['city'] = new_info['area'].split(' ')[1]       # 市名
         # form change
         new_info['jrdqtlqk[]'] = 0
         new_info['jrdqjcqk[]'] = 0
@@ -119,70 +147,55 @@ class DecodeError(Exception):
     pass
 
 
-def main(username, password):
+def main():
     """Hit card process
 
-    Arguments:
-        username: (str) 浙大统一认证平台用户名（一般为学号）
-        password: (str) 浙大统一认证平台密码
     """
-    print("\n[Time] %s" %datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-    print("🚌 打卡任务启动")
-    spinner = Halo(text='Loading', spinner='dots')
-    spinner.start('正在新建打卡实例...')
-    dk = DaKa(username, password)
-    spinner.succeed('已新建打卡实例')
+    start_time = ("\n[Time] %s" %datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+    # print("🚌 打卡任务启动")
+    # spinner = Halo(text='Loading', spinner='dots')
+    # spinner.start('正在新建打卡实例...')
+    dk = DaKa()
+    # spinner.succeed('已新建打卡实例')
 
-    spinner.start(text='登录到浙大统一身份认证平台...')
+    # spinner.start(text='登录到浙大统一身份认证平台...')
     try:
         dk.login()
-        spinner.succeed('已登录到浙大统一身份认证平台')
+        # spinner.succeed('已登录到浙大统一身份认证平台')
     except Exception as err:
-        spinner.fail(str(err))
+        # spinner.fail(str(err))
         return
 
-    spinner.start(text='正在获取个人信息...')
+    # spinner.start(text='正在获取个人信息...')
     try:
         dk.get_info()
-        spinner.succeed('%s %s同学, 你好~' %(dk.info['number'], dk.info['name']))
+        # spinner.succeed('%s %s同学, 你好~' %(dk.info['number'], dk.info['name']))
+        personal_info = ('%s %s同学, 你好~' %(dk.info['number'], dk.info['name']))
     except Exception as err:
-        spinner.fail('获取信息失败，请手动打卡，更多信息: ' + str(err))
+        send_message(title='获取信息失败，请手动打卡，更多信息:', text=str(err))
+        # spinner.fail('获取信息失败，请手动打卡，更多信息: ' + str(err))
         return
 
-    spinner.start(text='正在为您打卡打卡打卡')
+    # spinner.start(text='正在为您打卡打卡打卡')
     try:
         res = dk.post()
         if str(res['e']) == '0':
-            spinner.stop_and_persist(symbol='🦄 '.encode('utf-8'), text='已为您打卡成功！')
+            send_message(title='打卡成功!', text=start_time+'\n\n'+personal_info)
+            # spinner.stop_and_persist(symbol='🦄 '.encode('utf-8'), text='已为您打卡成功！')
         else:
-            spinner.stop_and_persist(symbol='🦄 '.encode('utf-8'), text=res['m'])
+            send_message(title='登录失败，请核实账号密码重新登录')
+            # spinner.stop_and_persist(symbol='🦄 '.encode('utf-8'), text=res['m'])
     except:
-        spinner.fail('数据提交失败')
+        send_message(title='数据提交失败')
+        # spinner.fail('数据提交失败')
         return 
 
 
+# def main_handler(event, context):
+#   return main(username, password)
+
 if __name__=="__main__":
-    if os.path.exists('./config.json'):
-        configs = json.loads(open('./config.json', 'r').read())
-        username = configs["username"]
-        password = configs["password"]
-        hour = configs["schedule"]["hour"]
-        minute = configs["schedule"]["minute"]
-    else:
-        username = input("👤 浙大统一认证用户名: ")
-        password = getpass.getpass('🔑 浙大统一认证密码: ')
-        print("⏲  请输入定时时间（默认每天6:05）")
-        hour = input("\thour: ") or 6
-        minute = input("\tminute: ") or 5
-    main(username, password)
-
-    # Schedule task
-    scheduler = BlockingScheduler()
-    scheduler.add_job(main, 'cron', args=[username, password], hour=hour, minute=minute)
-    print('⏰ 已启动定时程序，每天 %02d:%02d 为您打卡' %(int(hour), int(minute)))
-    print('Press Ctrl+{0} to exit'.format('Break' if os.name == 'nt' else 'C'))
-
     try:
-        scheduler.start()
+        main()
     except (KeyboardInterrupt, SystemExit):
         pass
