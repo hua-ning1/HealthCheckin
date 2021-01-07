@@ -18,7 +18,7 @@
 
 ## LICENSE
 
-Copyright (c) 2020 tishacy.
+Copyright (c) 2020 Zwysun.
 
 Licensed under the [MIT License](https://github.com/Tishacy/ZJU-nCov-Hitcarder/blob/master/LICENSE)
 
