@@ -193,12 +193,8 @@ def main():
         return 
 
 
-def main_handler(event, context):
-  return main()
-
 if __name__=="__main__":
     try:
-        send_message("begin!")
         main()
     except (KeyboardInterrupt, SystemExit):
         pass
