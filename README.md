@@ -20,7 +20,7 @@
 
 ## LICENSE
 
-Copyright (c) 2020 Zwysun.
+Copyright (c) 2021 Zwysun.
 
 Licensed under the [MIT License](https://github.com/Zwysun/HealthCheckin/blob/main/LICENSE)
 
