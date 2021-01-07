@@ -22,7 +22,7 @@
 
 Copyright (c) 2020 Zwysun.
 
-Licensed under the [MIT License](https://github.com/Tishacy/ZJU-nCov-Hitcarder/blob/master/LICENSE)
+Licensed under the [MIT License](https://github.com/Zwysun/HealthCheckin/blob/main/LICENSE)
 
 
 
