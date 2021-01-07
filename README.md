@@ -16,7 +16,7 @@
 2. 添加 Secrets
 3. 开启 Actions
 
-可以参阅教程，https://zwya.tk/posts/21107/
+可以参阅[教程](https://zwya.tk/posts/21107/)
 
 ## LICENSE
 
