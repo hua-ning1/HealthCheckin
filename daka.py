@@ -9,19 +9,21 @@ import getpass
 # 环境变量
 # 统一认证学号
 username = os.environ["USERNAME"]
+# username = ''
 # 统一认证密码
 password = os.environ["PASSWORD"]
+# password = ''
 # server酱的sckey
 sckey = os.environ["PUSH_KEY"]
+# sckey = ''
 # customize address
 # todo
 
 def send_message(title='无效', text=''):
-    if not len(sckey):
-        if text == '':
-            requests.get('https://sc.ftqq.com/' + sckey + '.send?text=' + title)
-        else:
-            requests.get('https://sc.ftqq.com/' + sckey + '.send?text=' + title + '&desp=' + text)
+    if text == '':
+        requests.get('https://sc.ftqq.com/' + sckey + '.send?text=' + title)
+    else:
+        requests.get('https://sc.ftqq.com/' + sckey + '.send?text=' + title + '&desp=' + text)
     return
 
 class DaKa(object):
@@ -183,7 +185,7 @@ def main():
             send_message(title='打卡成功!', text=start_time+'\n\n'+personal_info)
             # spinner.stop_and_persist(symbol='🦄 '.encode('utf-8'), text='已为您打卡成功！')
         else:
-            send_message(title='登录失败，请核实账号密码重新登录')
+            send_message(title=res['m'])
             # spinner.stop_and_persist(symbol='🦄 '.encode('utf-8'), text=res['m'])
     except:
         send_message(title='数据提交失败')
